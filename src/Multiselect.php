@@ -190,7 +190,7 @@ class Multiselect
         $inputName = $name.'-ms';
 
         return $this->toHtmlString(
-            '<script>$(document).ready(function() {'.
+            '<script type="module">$(document).ready(function() {'.
             '$("#'.$inputName.'").lmsAutocomplete("'.
             $url.'", '.
             json_encode($params, JSON_FORCE_OBJECT).
