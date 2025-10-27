@@ -9,6 +9,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace AndreChalom\LaravelMultiselect;
 
 use Illuminate\Support\Facades\Facade;
@@ -25,6 +27,7 @@ class MultiselectFacade extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'multiselect';
+        // use the concrete class name as the container binding (keeps compatibility)
+        return Multiselect::class;
     }
 }

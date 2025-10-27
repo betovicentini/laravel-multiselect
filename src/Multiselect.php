@@ -8,6 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+declare(strict_types=1);
 
 namespace AndreChalom\LaravelMultiselect;
 
@@ -17,13 +18,14 @@ use Illuminate\Support\HtmlString;
 
 class Multiselect
 {
-    protected $session;
-    protected $request;
+    protected ?Session $session;
+    protected ?Request $request;
+
 
     /**
      * Create a new Multiselect instance. This method expects both a session and a request arguments, in order to be able to look up "old" values.
      */
-    public function __construct(Session $session = null, Request $request = null)
+    public function __construct(?Session $session = null, ?Request $request = null)
     {
         $this->session = $session;
         $this->request = $request;
@@ -40,7 +42,7 @@ class Multiselect
      *
      * @return array
      */
-    protected function getValueArray($name, $value = null)
+    protected function getValueArray($name, $value = null): array
     {
         // Looks for the values in "old"
         if (!$this->oldInputIsEmpty()) {
@@ -51,16 +53,16 @@ class Multiselect
             }
         }
         // Looks for the values in the Request
-        if (isset($this->request) and $this->request->input($name)) {
+        if (isset($this->request) && $this->request->input($name)) {
             return $this->request->input($name);
         }
         // Returns the default value
         return empty($value) ? [] : $value;
     }
 
-    public function oldInputIsEmpty()
+    public function oldInputIsEmpty(): bool
     {
-        return is_null($this->session) or 0 == count($this->session->getOldInput());
+        return is_null($this->session) || 0 == count($this->session->getOldInput());
     }
 
     /**
@@ -72,7 +74,7 @@ class Multiselect
      *
      * @return string
      */
-    protected function attributeElement($key, $value)
+    protected function attributeElement($key, $value): ?string
     {
         // For numeric keys we will assume that the value is a boolean attribute
         // where the presence of the attribute represents a true value and the
@@ -99,7 +101,7 @@ class Multiselect
      *
      * @return string
      */
-    protected function attributes($attributes)
+    protected function attributes($attributes): string
     {
         $html = [];
         foreach ((array) $attributes as $key => $value) {
@@ -119,7 +121,7 @@ class Multiselect
      *
      * @return \Illuminate\Support\HtmlString
      */
-    protected function toHtmlString($html)
+    protected function toHtmlString($html): HtmlString
     {
         return new HtmlString($html);
     }
@@ -132,7 +134,7 @@ class Multiselect
      *
      * @return \Illuminate\Support\HtmlString
      * */
-    protected function option($display, $value, array $attributes = [])
+    protected function option($display, $value, array $attributes = []): HtmlString
     {
         $options = ['value' => $value] + $attributes;
 
@@ -157,7 +159,7 @@ class Multiselect
         array $inputAttributes = [],
         array $spanAttributes = [],
         $inputOnly = false
-    ) {
+    ): HtmlString {
         // Forces the ID attribute
         $inputAttributes['id'] = $name.'-ms';
         if (!isset($inputAttributes['class'])) {
@@ -186,16 +188,11 @@ class Multiselect
         $name,
         $url,
         array $params = []
-    ) {
+    ): HtmlString {
         $inputName = $name.'-ms';
-
-        return $this->toHtmlString(
-            '<script type="module">$(document).ready(function() {'.
-            '$("#'.$inputName.'").lmsAutocomplete("'.
-            $url.'", '.
-            json_encode($params, JSON_FORCE_OBJECT).
-            ');'.
-            '});</script>');
+        $json = json_encode($params, JSON_FORCE_OBJECT);
+        $script = '<script>$(document).ready(function() {$("#'.$inputName.'").lmsAutocomplete("'.$url.'", '.$json.');});</script>';
+        return $this->toHtmlString($script);
     }
 
     /**
@@ -217,7 +214,7 @@ class Multiselect
         array $optionsAttributes = [],
         array $spanAttributes = [],
         $selectOnly = false
-    ) {
+    ): HtmlString {
         // Forces the ID attribute
         $selectAttributes['id'] = $name.'-ms';
         if (!isset($selectAttributes['class'])) {
@@ -264,7 +261,7 @@ class Multiselect
         $default = [],
         array $spanAttributes = [],
         $strict = false
-    ) {
+    ): HtmlString {
         // Forces the ID attribute
         $spanAttributes['id'] = $name.'-span';
 
@@ -299,7 +296,7 @@ class Multiselect
      *
      * @return \Illuminate\Support\HtmlString
      * */
-    public function spanElement($name, $display, $value)
+    public function spanElement($name, $display, $value): HtmlString
     {
         $options = ['onClick' => '$(this).remove();', 'class' => 'multiselector'];
 
@@ -307,6 +304,7 @@ class Multiselect
             '<span'.$this->attributes($options).'>'.
             '<input type="hidden" name="'.$name.'[]" value="'.$value.'">'
             .e($display).
-            '</span>');
+            '</span>'
+        );
     }
 }
