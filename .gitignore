@@ -4,3 +4,5 @@ vendor/
 composer.lock
 cloverfile.xml
 .phpunit.result.cache
+.php-cs-fixer.cache
+README.html
